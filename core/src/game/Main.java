@@ -130,7 +130,7 @@ public class Main extends ApplicationAdapter {
 
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(Colours.dark.r, Colours.dark.g, Colours.dark.b, 1);
+		Gdx.gl.glClearColor(Colours.dark.r, 1, Colours.dark.b, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		update(Gdx.graphics.getDeltaTime());
 		stage.draw();
