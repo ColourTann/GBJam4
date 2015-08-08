@@ -32,9 +32,9 @@ public class Border {
 		Draw.drawRotatedScaled(batch, corner, x, y+height, 1, 1, (float)Math.PI*3/2);
 		
 		//edges//
-		Draw.drawRotatedScaled(batch, edge, x+offset, y, width-offset*2, 1, 0);
-		Draw.drawRotatedScaled(batch, edge, x+width, y+offset, height-offset*2, 1, (float)Math.PI/2);
-		Draw.drawRotatedScaled(batch, edge, x+width-offset, y+height, width-offset*2, 1, (float)Math.PI);
-		Draw.drawRotatedScaled(batch, edge, x, y+height-offset, height-offset*2, 1, (float)Math.PI*3/2);
+		Draw.drawRotatedScaled(batch, edge, x+offset, y, width-offset*2+1, 1, 0);
+		Draw.drawRotatedScaled(batch, edge, x+width, y+offset, height-offset*2+1, 1, (float)Math.PI/2);
+		Draw.drawRotatedScaled(batch, edge, x+width-offset, y+height, width-offset*2+1, 1, (float)Math.PI);
+		Draw.drawRotatedScaled(batch, edge, x, y+height-offset, height-offset*2+1, 1, (float)Math.PI*3/2);
 	}
 }
