@@ -140,7 +140,7 @@ public class Main extends ApplicationAdapter {
 	}
 	
 	public void drawFPS(Batch batch){
-		Fonts.font.setColor(Colours.light);
+		Fonts.font.setColor(Colours.green);
 		Fonts.font.draw(batch, "FPS: "+Gdx.graphics.getFramesPerSecond(), 0, stage.getHeight());
 	}
 	
