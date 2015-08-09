@@ -45,6 +45,7 @@ public class Main extends ApplicationAdapter {
 	Screen previousScreen;
 	public enum MainState{Normal, Paused}
 	private static float scaleFactor=8;
+	public static float ticks=0;
 	public static int m2p(float meters){
 		return (int) Math.round(meters*scaleFactor);
 	}
@@ -177,6 +178,7 @@ public class Main extends ApplicationAdapter {
 
 
 	public void update(float delta){
+		ticks+=delta;
 		Sounds.tickFaders(delta);
 		stage.act(delta);
 	}
