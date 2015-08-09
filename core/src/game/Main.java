@@ -1,11 +1,12 @@
 package game;
 
+import game.screens.gameScreen.GameScreen;
 import game.screens.pause.InputBlocker;
 import game.screens.pause.PauseScreen;
 import game.screens.testScreens.FontScreen;
-import game.screens.testScreens.GameScreen;
 import game.screens.testScreens.StartScreen;
 import game.util.Colours;
+import game.util.Draw;
 import game.util.Fonts;
 import game.util.Screen;
 import game.util.Slider;
@@ -18,10 +19,14 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -29,53 +34,61 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 
 public class Main extends ApplicationAdapter {
-	public static int width=400,height=320;
+	public static int width=160,height=144;
 	SpriteBatch batch;
 	Stage stage;
-	OrthographicCamera cam;
+	public OrthographicCamera cam;
 	public static TextureAtlas atlas;
 	public static Main self;
-	public static int scale=1;
+	public static int scale=5;
 	Screen currentScreen;
 	Screen previousScreen;
 	public enum MainState{Normal, Paused}
+	private static float scaleFactor=8;
+	public static int m2p(float meters){
+		return (int) Math.round(meters*scaleFactor);
+	}
+	
+	public static float p2m(float pixels){
+		return pixels/scaleFactor;
+	}
+	
 	@Override
 	public void create () {
 		self=this;
-		
+
 		Sounds.setup();
 		Fonts.setup();
-		
-		
-		
+		Box2D.init();
+
+
+		buffer = new FrameBuffer(Format.RGBA8888, Main.width, Main.height, false);
 		atlas= new TextureAtlas(Gdx.files.internal("atlas_image.atlas"));
 		stage = new Stage();
 		cam =(OrthographicCamera) stage.getCamera();
 		batch = (SpriteBatch) stage.getBatch();
 		Gdx.input.setInputProcessor(stage);
-		
-		
-		setScreen(new StartScreen());
-//		setScreen(new FontScreen());
-		
 
+		setScreen(GameScreen.get());
+
+		setScale(scale);
 
 		stage.addListener(new InputListener(){
 			public boolean keyDown (InputEvent event, int keycode) {
-				
+
 				switch(keycode){
 				case Keys.ESCAPE:
 					toggleMenu();
 					return false;
 				}
-				
+
 				return true;
 			}
 
-			
+
 		});
 	}
-	
+
 	public void setScale(int scale){
 		Main.scale=scale;
 		int newWidth = width*scale;
@@ -83,7 +96,7 @@ public class Main extends ApplicationAdapter {
 		Gdx.graphics.setDisplayMode(newWidth, newHeight, false);
 		stage.getViewport().update(newWidth, newHeight);
 	}
-	
+
 	public void toggleMenu() {
 		if(state!=MainState.Paused){
 			stage.addActor(InputBlocker.get());
@@ -97,9 +110,9 @@ public class Main extends ApplicationAdapter {
 		}
 
 	}
-	
-	
-	
+
+
+
 	private MainState state=MainState.Normal;
 	public MainState getState(){
 		return state;
@@ -114,37 +127,55 @@ public class Main extends ApplicationAdapter {
 		switch(type){
 		case LEFT:
 			screen.setPosition(Main.width, 0);
-//			Action a = ;
+			//			Action a = ;
 			screen.addAction(Actions.moveTo(0, 0, speed, interp));
 			previousScreen.addAction(Actions.moveTo(-Main.width, 0, speed, interp));
 			break;
 		}
 		previousScreen.addAction(Actions.after(Actions.removeActor()));
 	}
-	
+
 	public void setScreen(Screen screen){
 		previousScreen=currentScreen;
 		currentScreen=screen;
 		stage.addActor(screen);
 	}
-
+	FrameBuffer buffer;
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(Colours.dark.r, 1, Colours.dark.b, 1);
+		Gdx.gl.glClearColor(Colours.dark.r, Colours.dark.g, Colours.dark.b, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		update(Gdx.graphics.getDeltaTime());
+		//		
+		buffer.bind();
+		buffer.begin();
+		batch.begin();
+		batch.setColor(Colours.dark);
+		Draw.fillRectangle(batch, 0, 0, 500, 500);
+		batch.end();
 		stage.draw();
 		batch.begin();
+
 		drawFPS(batch);
 		batch.end();
+		buffer.end();
+
+		batch.begin();
+		batch.setColor(1,1,1,1);
+		buffer.getColorBufferTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+		Draw.drawRotatedScaledFlipped(batch, buffer.getColorBufferTexture(), 0, 0, 1, 1, 0, false, true);
+		batch.end();
+
+
+		//		stage.draw();
 	}
-	
+
 	public void drawFPS(Batch batch){
 		Fonts.font.setColor(Colours.green);
 		Fonts.font.draw(batch, "FPS: "+Gdx.graphics.getFramesPerSecond(), 0, stage.getHeight());
 	}
-	
-	
+
+
 	public void update(float delta){
 		Sounds.tickFaders(delta);
 		stage.act(delta);

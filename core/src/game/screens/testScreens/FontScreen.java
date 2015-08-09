@@ -23,7 +23,6 @@ public class FontScreen extends Screen{
 
 	@Override
 	public void postDraw(Batch batch) {
-		
 		for(int i=0;i<4;i++){
 			Fonts.fontSizes[i].draw(batch, "Different sizes!", getX()+0, getY()-30+(float) (getHeight()-(Math.pow(i, 1.98)+i*1)*5));
 			System.out.println(getY()-30+(float) (Gdx.graphics.getHeight()-(Math.pow(i, 1.98)+i*1)*5));

@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -135,7 +136,12 @@ public class Draw {
 
 	public static void fillRectangle(Batch batch, float x, float y,
 			float width, float height) {
-		Draw.drawScaled(batch, Draw.getSq(), x, y, width, height);
+		fillRectangle(batch, x, y, width, height, 0);
+	}
+	
+	public static void fillRectangle(Batch batch, float x, float y,
+			float width, float height, float rotation) {
+		Draw.drawRotatedScaled(batch, Draw.getSq(), x, y, width, height, rotation);
 	}
 
 	public static void drawLine(Batch batch, float x, float y, float tX,

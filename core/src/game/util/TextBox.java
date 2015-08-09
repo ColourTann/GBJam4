@@ -17,7 +17,7 @@ public class TextBox extends Actor{
 	private static Color dummyColor=Colours.white;
 	private static BitmapFont defaultFont=Fonts.font;
 	BitmapFont font = defaultFont;
-	public static int gap =10;
+	public static int gap =4;
 	int wrapWidth;
 	String text;
 	int fontHeight;

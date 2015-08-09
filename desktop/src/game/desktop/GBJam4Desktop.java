@@ -16,7 +16,7 @@ public class GBJam4Desktop {
 		config.foregroundFPS=60;
 		config.width=Main.width;
 		config.height=Main.height;
-		
+		config.samples=0;
 		Settings settings = new Settings();
 		settings.combineSubdirectories = true;
 		TexturePacker.process(settings, "../images", "../core/assets", "atlas_image");

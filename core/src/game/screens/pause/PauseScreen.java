@@ -2,8 +2,8 @@ package game.screens.pause;
 
 import game.Main;
 import game.Main.TransitionType;
+import game.screens.gameScreen.GameScreen;
 import game.screens.testScreens.FontScreen;
-import game.screens.testScreens.GameScreen;
 import game.screens.testScreens.StartScreen;
 import game.util.Border;
 import game.util.Screen;
@@ -18,7 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Align;
 
 public class PauseScreen extends Group{
-	private static int w=300,h=200;
+	private static int w=100,h=100;
 	private static PauseScreen self;
 	public static PauseScreen get(){
 		if(self==null)self=new PauseScreen();
