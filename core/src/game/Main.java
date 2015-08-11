@@ -46,6 +46,7 @@ public class Main extends ApplicationAdapter {
 	public enum MainState{Normal, Paused}
 	private static float scaleFactor=8;
 	public static float ticks=0;
+	private static boolean debug;
 	public static int m2p(float meters){
 		return (int) Math.round(meters*scaleFactor);
 	}
@@ -157,7 +158,7 @@ public class Main extends ApplicationAdapter {
 		stage.draw();
 		batch.begin();
 
-		drawFPS(batch);
+		if(Main.debug)drawFPS(batch);
 		batch.end();
 		buffer.end();
 

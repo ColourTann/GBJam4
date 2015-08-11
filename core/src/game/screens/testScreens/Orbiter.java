@@ -10,7 +10,7 @@ import game.util.Particle;
 public class Orbiter extends Particle{
 
 	public Orbiter(float x, float y) {
-		setupLife(.5f);
+		setupLife(Particle.rand(.3f, .7f));
 		this.x=x;
 		this.y=y;
 		float angle = (float) (Math.random()*Math.PI*2);

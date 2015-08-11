@@ -97,6 +97,10 @@ public class Noise { // Simplex noise in 2D, 3D and 4D
 		return g.x * x + g.y * y + g.z * z + g.w * w;
 	}
 
+	public static double noise(double xin) {
+		return noise(xin,0);
+		
+	}
 	// 2D simplex noise
 	public static double noise(double xin, double yin) {
 		double n0, n1, n2; // Noise contributions from the three corners

@@ -25,17 +25,27 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Array;
 
 import game.Main;
+import game.screens.gameScreen.physics.CollisionHandler;
+import game.screens.gameScreen.physics.entity.Archer;
+import game.screens.gameScreen.physics.entity.Mask;
+import game.screens.gameScreen.physics.entity.DumbBox;
+import game.screens.gameScreen.physics.entity.Entity;
+import game.screens.gameScreen.physics.entity.Ship;
 import game.util.Particle;
 import game.util.Screen;
 
 public class GameScreen extends Screen{
 
-	static World world = new World(new Vector2(0,0), false);
+	
+	
+	
+	public static World world = new World(new Vector2(0,0), false);
 	Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
 	public static GameScreen self;
 	Body body;
 	ArrayList<Ship> ships = new ArrayList<Ship>();
-	Enemy currentEnemy;
+	Entity currentEnemy;
+	Entity currentPlayer;
 	public static GameScreen get(){
 		if(self==null)self=new GameScreen();
 		return self;
@@ -44,21 +54,16 @@ public class GameScreen extends Screen{
 	public GameScreen() {
 		self=this;
 		world.setContactListener(new ContactListener() {
-
 			@Override
 			public void beginContact(Contact contact) {
-				
-				
 			}
 
 			@Override
 			public void endContact(Contact contact) {
-			
 			}
 
 			@Override
 			public void preSolve(Contact contact, Manifold oldManifold) {
-				
 			}
 
 			@Override
@@ -71,32 +76,27 @@ public class GameScreen extends Screen{
 				
 				CollisionHandler handlerA =(CollisionHandler) bodyA.getUserData();
 				CollisionHandler handlerB =(CollisionHandler) bodyB.getUserData();
-
-				
 				
 				handlerA.handleCollision(bodyA, bodyB, handlerB, impulse.getNormalImpulses()[0], contact);
 				handlerB.handleCollision(bodyB, bodyA, handlerA, impulse.getNormalImpulses()[0], contact);
 			}
-
-
-
 		});
 		
 		
-		addEnemy();
 		for(int i=0;i<50;i++)addActor(new Star());
-
-		Ship s =new Ship(Main.p2m(50), Main.p2m(50));
+		
+		Ship s =new Ship(50, 50, true);
 		addActor(s);
+		currentPlayer=s;
 
+
+		addEnemy();
+		
 		addListener(new InputListener(){
 			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
 
 				for(int i=0;i<0;i++){
 
-
-					Ship s =new Ship(Main.p2m((int)x), Main.p2m((int)y));
-					addActor(s);
 
 				}
 				return false;
@@ -105,7 +105,7 @@ public class GameScreen extends Screen{
 		});
 
 
-		CollisionHandler edgeHandler = new CollisionHandler() {
+		CollisionHandler edgeHandler = new CollisionHandler(null) {
 
 			@Override
 			public void handleCollision(Body me, Body them,
@@ -114,7 +114,13 @@ public class GameScreen extends Screen{
 			}
 
 			@Override
-			public void damage(float damage) {
+			public void damage(int damage) {
+				defaultShake(Math.min(4, damage));
+			}
+
+			@Override
+			public String toString() {
+				return "edge";
 			}
 
 		
@@ -163,17 +169,22 @@ public class GameScreen extends Screen{
 
 	static BodyDef def = new BodyDef();
 	static FixtureDef fixDef = new FixtureDef();
-	static PolygonShape box = new PolygonShape();
-	public Body makeBody(Shape shape, float linearDampening, float friction, float density, float restitution, float x, float y, float size){
+
+	public Body makeBody(float x, float y, Shape shape, float density,  float linearDampening, float friction, float restitution){
+		return makeBody(x, y, shape, density, linearDampening, friction, restitution, Mask.border, Mask.border);
+	}
+	
+	public Body makeBody(float x, float y, Shape shape, float density,  float linearDampening, float friction, float restitution, short categoryBits, short maskBits){
 		def.type=BodyType.DynamicBody;
 		def.linearDamping=linearDampening;
-		fixDef.shape=box;
+		fixDef.shape=shape;
 		fixDef.density=density;
 		fixDef.friction=friction;
 		fixDef.restitution=restitution;
+		fixDef.filter.maskBits=maskBits;
+		fixDef.filter.categoryBits=categoryBits;
 		def.position.set(x,y);
 		def.angularDamping=2;
-		box.setAsBox(size, size);
 		Body bod =world.createBody(def);
 		Fixture fixture = bod.createFixture(fixDef);
 		return bod;
@@ -191,27 +202,69 @@ public class GameScreen extends Screen{
 	}
 	
 	Array<Body> bodies;
+	private static float timeStep=1/60f;
+	float ticks=0;
+	float ticksPerEnemy=1.4f;
 	@Override
 	public void preTick(float delta) {
-		world.step(delta, 6, 2);
+		world.step(timeStep, 6, 2);
 		for(Body b:toDestroy){
 			world.destroyBody(b);
-			System.out.println("dest");
 		}
-		toDestroy.clear();
-		if(currentEnemy.dead)addEnemy();
 		
+		toDestroy.clear();
+		ticks+=delta;
+//		while(ticks>=ticksPerEnemy){
+//			addEnemy();
+//			ticks-=ticksPerEnemy;
+//		}
+		if(currentEnemy.dead)addEnemy();
 	}
 	@Override
 	public void postTick(float delta) {
-		
+		for(int i=entities.size()-1;i>=0;i--){
+			Entity e = entities.get(i);
+			if(e.dead){
+				entities.remove(e);
+				removeActor(e);
+			}
+		}
 	}
 
+	ArrayList<Entity> entities = new ArrayList<>();
+	public void addEntity(Entity e){
+		entities.add(e);
+		addActor(e);
+	}
+	
+
+	
 	public void addEnemy() {
-		currentEnemy=new Enemy((int)Particle.rand(10,  Main.width-10), (int)Particle.rand(10, Main.height-10));
-		addActor(currentEnemy);
+		Entity e = getRandomEnemy();
+		currentEnemy=e;
+		addEntity(e);
+		
+	}
+	
+	
+	
+	public Entity getRandomEnemy(){
+		double rand = Math.random();
+		float gap = 50;
+		int x = (int)Particle.rand(gap,  Main.width-gap);
+		int y = (int)Particle.rand(gap, Main.height-gap);
+		if(rand>.7) return new Ship(x,y,false);
+		if(rand>.4) return new Archer(x, y);
+		return new DumbBox(x,y);
+	}
+	
+	
+
+	public static Entity getPlayer() {
+		return self.currentPlayer;
 	}
 
 
 
 }
+
