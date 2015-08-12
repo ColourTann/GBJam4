@@ -37,13 +37,13 @@ import com.badlogic.gdx.utils.viewport.ScalingViewport;
 
 
 public class Main extends ApplicationAdapter {
-	public static int width=160,height=144;
+	public static int width=35,height=144;
 	SpriteBatch batch;
 	Stage stage;
 	public OrthographicCamera cam;
 	public static TextureAtlas atlas;
 	public static Main self;
-	public static int scale=1;
+	public static int scale=5;
 	Screen currentScreen;
 	Screen previousScreen;
 	public enum MainState{Normal, Paused}
@@ -76,8 +76,7 @@ public class Main extends ApplicationAdapter {
 		batch = (SpriteBatch) stage.getBatch();
 		Gdx.input.setInputProcessor(stage);
 
-		cam.zoom=(float)Math.sqrt(2);
-		cam.update();
+
 		setScreen(GameScreen.get());
 
 		setScale(scale);

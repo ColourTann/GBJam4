@@ -85,7 +85,7 @@ public class GameScreen extends Screen{
 		
 		for(int i=0;i<50;i++)addActor(new Star());
 		
-		Ship s =new Ship(50, 50, true);
+		Ship s =new Ship(2, 50, true);
 		addActor(s);
 		currentPlayer=s;
 
