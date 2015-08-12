@@ -31,6 +31,9 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.utils.Scaling;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScalingViewport;
 
 
 public class Main extends ApplicationAdapter {
@@ -40,7 +43,7 @@ public class Main extends ApplicationAdapter {
 	public OrthographicCamera cam;
 	public static TextureAtlas atlas;
 	public static Main self;
-	public static int scale=5;
+	public static int scale=1;
 	Screen currentScreen;
 	Screen previousScreen;
 	public enum MainState{Normal, Paused}
@@ -63,14 +66,18 @@ public class Main extends ApplicationAdapter {
 		Fonts.setup();
 		Box2D.init();
 
-
+		
+		
+		
 		buffer = new FrameBuffer(Format.RGBA8888, Main.width, Main.height, false);
 		atlas= new TextureAtlas(Gdx.files.internal("atlas_image.atlas"));
-		stage = new Stage();
+		stage = new Stage(new FitViewport(Main.width, Main.height));
 		cam =(OrthographicCamera) stage.getCamera();
 		batch = (SpriteBatch) stage.getBatch();
 		Gdx.input.setInputProcessor(stage);
 
+		cam.zoom=(float)Math.sqrt(2);
+		cam.update();
 		setScreen(GameScreen.get());
 
 		setScale(scale);
@@ -96,6 +103,7 @@ public class Main extends ApplicationAdapter {
 		int newWidth = width*scale;
 		int newHeight= height*scale;
 		Gdx.graphics.setDisplayMode(newWidth, newHeight, false);
+		System.out.println(newWidth+":"+newHeight);
 		stage.getViewport().update(newWidth, newHeight);
 	}
 
@@ -148,12 +156,14 @@ public class Main extends ApplicationAdapter {
 		Gdx.gl.glClearColor(Colours.dark.r, Colours.dark.g, Colours.dark.b, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		update(Gdx.graphics.getDeltaTime());
+//		stage.draw();
 		//		
 		buffer.bind();
 		buffer.begin();
 		batch.begin();
-		batch.setColor(Colours.dark);
-		Draw.fillRectangle(batch, 0, 0, 500, 500);
+		batch.setColor(Colours.green);
+		batch.setProjectionMatrix(cam.combined);
+		Draw.fillRectangle(batch, 0, 0, Main.width, Main.height);
 		batch.end();
 		stage.draw();
 		batch.begin();

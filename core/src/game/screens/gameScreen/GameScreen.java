@@ -211,7 +211,6 @@ public class GameScreen extends Screen{
 		for(Body b:toDestroy){
 			world.destroyBody(b);
 		}
-		
 		toDestroy.clear();
 		ticks+=delta;
 //		while(ticks>=ticksPerEnemy){
