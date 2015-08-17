@@ -54,6 +54,10 @@ public class FontScreen extends Screen{
 	@Override
 	public void postTick(float delta) {
 	}
+
+	@Override
+	public void keyDown(int keycode) {
+	}
 	
 	
 

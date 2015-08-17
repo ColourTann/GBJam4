@@ -8,8 +8,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Border {
 
-	static Color bg = Colours.dark;
-	static Color mousedColour = Colours.grey;
+	static Color bg = Colours.green[3];
+	static Color mousedColour = Colours.green[2];
 	static TextureRegion corner = Main.atlas.findRegion("corner");
 	static TextureRegion edge = Main.atlas.findRegion("edge");
 	

@@ -12,8 +12,8 @@ import com.badlogic.gdx.utils.Align;
 
 
 public class Slider extends Actor{
-	public static Slider SFX=  new Slider("SFX", .5f, Colours.greyDark, Colours.grey);
-	public static Slider music=  new Slider("Music", .5f, Colours.greyDark, Colours.grey);
+	public static Slider SFX=  new Slider("SFX", .5f, Colours.green[3], Colours.green[2]);
+	public static Slider music=  new Slider("Music", .5f, Colours.green[3], Colours.green[2]);
 	static float w=250,h=30, gap=4;
 	
 	private float value;

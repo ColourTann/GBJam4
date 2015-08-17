@@ -2,6 +2,7 @@ package game.screens.gameScreen.physics.entity;
 
 import game.Main;
 import game.screens.gameScreen.GameScreen;
+import game.screens.gameScreen.map.Map;
 import game.screens.gameScreen.physics.CollisionHandler;
 import game.screens.gameScreen.physics.entity.controller.Controller;
 import game.screens.testScreens.Orbiter;
@@ -25,30 +26,38 @@ public class Ship extends Entity{
 
 	public static float smallSize = Main.p2m(2);
 	public static float bigSize = Main.p2m(3f);
-	int dist = (int) Main.p2m(35);
+	int dist = (int) Main.p2m(33);
 
 
 	Body hull;
 	Body spike;
 	public Ship(float x, float y, boolean player){
-setHP(15);
+		setHP(9915);
 		box.setAsBox(smallSize, smallSize);
-		
-		short mask = player?(short)(Mask.border|Mask.enemy|Mask.projectile):(short)(Mask.player|Mask.border);
+
+		short mask = player?(short)(Mask.border|Mask.enemy|Mask.projectile):(short)(Mask.player|Mask.border|Mask.enemy);
 		short category = player?Mask.player:Mask.enemy;
-		
-		hull=GameScreen.self.makeBody(Main.p2m(x), Main.p2m(y), box, 1.5f, 2, .1f, .6f, category, mask);
+
+		hull=Map.self.makeBody(Main.p2m(x), Main.p2m(y), box, 1.5f, 2, .1f, .6f, category, mask);
 		bod=hull;
 		hull.setUserData(new CollisionHandler(hull) {
 			@Override
 			public void handleCollision(Body me, Body them, CollisionHandler other, float collisionStrength, Contact contact) {
+				
 
 			}
 
 			@Override
-			public void damage(int damage) {
-				defaultDamage(damage);
-				defaultShake(damage*2);
+			public void damage(int damage, short mask) {
+				if((mask&Mask.player)>0){
+					if(damage>1){
+						Map.self.destroyBody(hull);
+						hull=null;
+						defaultDamage(damage);
+						defaultShake(10);
+						
+					}
+				}
 			}
 
 			@Override
@@ -57,18 +66,16 @@ setHP(15);
 			}
 		});
 
-
-//		mask = player?(short)(Mask.enemy|Mask.projectile):(short)(Mask.player);
 		box.setAsBox(bigSize*2, bigSize/2);
-		spike=GameScreen.self.makeBody(Main.p2m(x)+dist, Main.p2m(y), box, .2f, 0, .1f, .6f,  category, mask);
+		spike=Map.self.makeBody(Main.p2m(x)+dist, Main.p2m(y), box, .2f, 0, .1f, .6f,  category, mask);
 		spike.setUserData(new CollisionHandler(spike) {
 			@Override
 			public void handleCollision(Body me, Body them, CollisionHandler other, float collisionStrength, Contact contact) {
-				other.damage((int)(collisionStrength*2));
+				other.damage((int)(collisionStrength*4), Mask.enemy);
 			}
 
 			@Override
-			public void damage(int damage) {
+			public void damage(int damage, short mask) {
 
 			}
 
@@ -77,6 +84,7 @@ setHP(15);
 				return "ship tail";
 			}
 		});
+
 		spike.setBullet(true);
 		otherBod=spike;
 		DistanceJointDef jointDef = new DistanceJointDef();
@@ -84,15 +92,16 @@ setHP(15);
 		jointDef.bodyA=hull;
 		jointDef.bodyB=spike;
 		jointDef.initialize(hull, spike, hull.getPosition(), spike.getPosition());
-		GameScreen.world.createJoint(jointDef);
+		Map.world.createJoint(jointDef);
 
 
 		if(player){
 			setController(new Controller() {
 				@Override
 				public void act(float delta) {
+					if(hull==null)return;
 					int dx=0, dy=0;
-					int accel=15*2;
+					int accel=28;
 					if(Gdx.input.isKeyPressed(Keys.W)||Gdx.input.isKeyPressed(Keys.UP)) dy=1;
 					if(Gdx.input.isKeyPressed(Keys.S)||Gdx.input.isKeyPressed(Keys.DOWN)) dy=-1;
 					if(Gdx.input.isKeyPressed(Keys.A)||Gdx.input.isKeyPressed(Keys.LEFT)) dx=-1;
@@ -104,19 +113,20 @@ setHP(15);
 		else{
 			setController(new Controller() {
 				float noiseOffset = (float) (Math.random()*1000);
-				float noiseAmp=8;
-				float playerAmp=2;
+				float noiseAmp=180;
+				float playerAmp=16;
 				float freq=100f;
-		
+
 				@Override
 				public void act(float delta) {
-					Entity player = GameScreen.getPlayer();
+
+					Entity player = Map.getPlayer();
 					Vector2 dv =player.bod.getPosition().sub(bod.getPosition()).nor();
 					bod.applyForceToCenter(
-							dv.x*playerAmp+(float)Noise.noise((Main.ticks+noiseOffset)*freq)*noiseAmp, 
-							dv.y*playerAmp+(float) Noise.noise((Main.ticks+100+noiseOffset)*freq)*noiseAmp, true);
+							(float) (dv.x*playerAmp+Math.pow(Noise.noise((Main.ticks+noiseOffset)*freq), 2)*noiseAmp), 
+							dv.y*playerAmp+(float) Math.pow(Noise.noise((Main.ticks+100+noiseOffset)*freq),2)*noiseAmp, true);
 				}
-				
+
 			});
 		}
 	}
@@ -125,16 +135,20 @@ setHP(15);
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		batch.setColor(Colours.light);
-		drawBod(batch, hull, smallSize, smallSize);
-		Draw.drawLine(batch, 
-				getX(), getY(), 
-				(int)Main.m2p(spike.getPosition().x), (int)Main.m2p(spike.getPosition().y), 
-				1);
-		batch.setColor(Colours.red);
-		drawBod(batch, spike, bigSize*2, bigSize/2);
+		batch.setColor(Colours.green[1]);
+		if(hull!=null){
+			Draw.drawLine(batch, 
+					getX(), getY(), 
+					(int)Main.m2p(spike.getPosition().x), (int)Main.m2p(spike.getPosition().y), 
+					1);
 
+			batch.setColor(Colours.green[0]);
+			drawBod(batch, hull, smallSize, smallSize);
+		}
+		batch.setColor(Colours.green[2]);
+		drawBod(batch, spike, bigSize*2, bigSize/2);
 		super.draw(batch, parentAlpha);
+
 	}
 
 	public static float getVelocity(Body aBod){

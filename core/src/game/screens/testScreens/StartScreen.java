@@ -31,4 +31,8 @@ public class StartScreen extends Screen{
 	public void postTick(float delta) {
 	}
 
+	@Override
+	public void keyDown(int keycode) {
+	}
+
 }

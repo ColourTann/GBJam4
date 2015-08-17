@@ -2,6 +2,7 @@ package game.screens.gameScreen.physics.entity;
 
 import game.Main;
 import game.screens.gameScreen.GameScreen;
+import game.screens.gameScreen.map.Map;
 import game.screens.gameScreen.physics.CollisionHandler;
 import game.util.Colours;
 import game.util.Draw;
@@ -20,18 +21,16 @@ public class Projectile extends Entity{
 	public Projectile(float x, float y) {
 		setHP(1);
 		
-		bod = GameScreen.get().makeBody(Main.p2m(x), Main.p2m(y), box, .3f, 0, 10000, 1, Mask.projectile, (short)(Mask.player|Mask.projectile));
+		bod = Map.self.makeBody(Main.p2m(x), Main.p2m(y), box, .3f, 0, 10000, 1, Mask.projectile, (short)(Mask.player|Mask.projectile));
 		bod.setUserData(new CollisionHandler(bod) {
 			@Override
 			public void handleCollision(Body me, Body them, CollisionHandler other, float collisionStrength, Contact contact) {
 				if(dead)return;
-//				dead=true;
-//				GameScreen.get().destroyBody(bod);
-//				bod=null;
+				kill();
 			}
 
 			@Override
-			public void damage(int damage) {	
+			public void damage(int damage, short mask) {	
 				defaultShake(damage);
 				defaultDamage(1);
 			}
@@ -49,10 +48,10 @@ public class Projectile extends Entity{
 	@Override
 	public void postAct(float delta) {
 		float gap = size*2;
-		if(getX()<-gap||getX()>Main.width+gap||
-				getY()<-gap||getY()>Main.height+gap){
+		if(getX()<-gap||getX()>GameScreen.get().getWidth()+gap||
+				getY()<-gap||getY()>GameScreen.get().getHeight()+gap){
 			dead=true;
-			GameScreen.get().destroyBody(bod);
+			Map.self.destroyBody(bod);
 			bod=null;
 			
 		}
@@ -61,7 +60,7 @@ public class Projectile extends Entity{
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		if(dead)return;
-		batch.setColor(Colours.red);
+		batch.setColor(Colours.green[2]);
 		Draw.drawCenteredRotatedScaled(batch, Draw.getSq(), 
 				getX(), getY(), 
 				Main.m2p(size*2), 

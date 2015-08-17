@@ -26,7 +26,7 @@ public abstract class Screen extends Group{
 	public void draw(Batch batch, float parentAlpha) {
 		preDraw(batch);
 		super.draw(batch, parentAlpha);
-		drawParticles(batch);
+		
 		postDraw(batch);
 
 	}
@@ -37,7 +37,8 @@ public abstract class Screen extends Group{
 	public void act(float delta) {
 		if(Main.self.getState()==MainState.Paused)return;
 		
-		setPosition((float)(Math.sin(Main.ticks*shakeFrequency)*shakeMagnitude), (float) (Math.cos((Main.ticks+100)*shakeFrequency)*shakeMagnitude));
+		setPosition(getX()+(float)(Math.sin(Main.ticks*shakeFrequency)*shakeMagnitude), 
+				getY()+(float) (Math.cos((Main.ticks+100)*shakeFrequency)*shakeMagnitude));
 		
 		shakeMagnitude*=Math.pow(shakeDrag, delta);
 		
@@ -56,19 +57,22 @@ public abstract class Screen extends Group{
 	}
 	private void tickParticles(float delta) {
 		particles.addAll(newParticles);
+		for(Particle p: newParticles) addActor(p);
 		newParticles.clear();
 		for(int i=particles.size()-1;i>=0;i--){
 			Particle p = particles.get(i);
-			p.act(delta);
-			if(p.dead)particles.remove(p);
+			if(p.dead){
+				p.remove();
+				particles.remove(p);
+			}
 		}
 	}
 
-	public void drawParticles(Batch batch){
-		for(Particle p : particles) p.draw(batch);
-	}
+
 
 	public void shake(float magnitiude){ //pop pop//
 		shakeMagnitude+=magnitiude;
 	}
+
+	public abstract void keyDown(int keycode);
 }

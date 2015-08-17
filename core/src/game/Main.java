@@ -3,21 +3,15 @@ package game;
 import game.screens.gameScreen.GameScreen;
 import game.screens.pause.InputBlocker;
 import game.screens.pause.PauseScreen;
-import game.screens.testScreens.FontScreen;
-import game.screens.testScreens.StartScreen;
 import game.util.Colours;
 import game.util.Draw;
 import game.util.Fonts;
 import game.util.Screen;
-import game.util.Slider;
 import game.util.Sounds;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -31,13 +25,11 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScalingViewport;
 
 
 public class Main extends ApplicationAdapter {
-	public static int width=35,height=144;
+	public static int width=160,height=144;
 	SpriteBatch batch;
 	Stage stage;
 	public OrthographicCamera cam;
@@ -49,7 +41,7 @@ public class Main extends ApplicationAdapter {
 	public enum MainState{Normal, Paused}
 	private static float scaleFactor=8;
 	public static float ticks=0;
-	private static boolean debug;
+	private static boolean debug=true;
 	public static int m2p(float meters){
 		return (int) Math.round(meters*scaleFactor);
 	}
@@ -89,6 +81,7 @@ public class Main extends ApplicationAdapter {
 					toggleMenu();
 					return false;
 				}
+				currentScreen.keyDown(keycode);
 
 				return true;
 			}
@@ -152,15 +145,12 @@ public class Main extends ApplicationAdapter {
 	FrameBuffer buffer;
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(Colours.dark.r, Colours.dark.g, Colours.dark.b, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		update(Gdx.graphics.getDeltaTime());
-//		stage.draw();
-		//		
+		
 		buffer.bind();
 		buffer.begin();
 		batch.begin();
-		batch.setColor(Colours.green);
+		batch.setColor(Colours.green[3]);
 		batch.setProjectionMatrix(cam.combined);
 		Draw.fillRectangle(batch, 0, 0, Main.width, Main.height);
 		batch.end();
@@ -182,7 +172,7 @@ public class Main extends ApplicationAdapter {
 	}
 
 	public void drawFPS(Batch batch){
-		Fonts.font.setColor(Colours.green);
+		Fonts.font.setColor(Colours.green[0]);
 		Fonts.font.draw(batch, "FPS: "+Gdx.graphics.getFramesPerSecond(), 0, stage.getHeight());
 	}
 

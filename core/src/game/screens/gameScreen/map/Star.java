@@ -1,4 +1,4 @@
-package game.screens.gameScreen;
+package game.screens.gameScreen.map;
 
 import game.Main;
 import game.util.Colours;
@@ -12,12 +12,11 @@ public class Star extends Actor{
 	
 	public Star() {
 		setSize(1, 1);
-		setPosition(Particle.rand(0, Main.width), Particle.rand(0, Main.height));
 	}
 	
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		batch.setColor(Colours.light);
+		batch.setColor(Colours.green[0]);
 		Draw.fillRectangle(batch, getX(), getY(), getWidth(), getHeight());
 		super.draw(batch, parentAlpha);
 	}

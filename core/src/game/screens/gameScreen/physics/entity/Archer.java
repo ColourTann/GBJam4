@@ -2,6 +2,7 @@ package game.screens.gameScreen.physics.entity;
 
 import game.Main;
 import game.screens.gameScreen.GameScreen;
+import game.screens.gameScreen.map.Map;
 import game.screens.gameScreen.physics.CollisionHandler;
 import game.screens.gameScreen.physics.entity.controller.Controller;
 import game.util.Colours;
@@ -23,15 +24,15 @@ public class Archer extends Entity{
 	}
 	public Archer(int x, int y) {
 		setHP(2);
-		bod = GameScreen.get().makeBody(Main.p2m(x), Main.p2m(y) , box, .2f, 8, 10000, 1, Mask.enemy, (short)(Mask.player|Mask.border));
+		bod = Map.self.makeBody(Main.p2m(x), Main.p2m(y) , box, .2f, 8, 10000, 1, Mask.enemy, (short)(Mask.player|Mask.border|Mask.enemy));
 		bod.setUserData(new CollisionHandler(bod) {
 			@Override
 			public void handleCollision(Body me, Body them, CollisionHandler other, float collisionStrength, Contact contact) {
-				other.damage((int)(collisionStrength*2));
+				other.damage((int)(collisionStrength*2), (short)5);
 			}
 
 			@Override
-			public void damage(int damage) {
+			public void damage(int damage, short mask) {
 				defaultShake(damage);
 				defaultDamage(damage);
 			}
@@ -50,12 +51,12 @@ public class Archer extends Entity{
 			float secondsPerShot=2f;
 			@Override
 			public void act(float delta) {
-				Entity player = GameScreen.getPlayer();
+				Entity player = Map.getPlayer();
 				ticks+=delta;
 				bod.applyForceToCenter((float)Noise.noise((Main.ticks+noiseOffset)*freq)*speed, 
 						(float) Noise.noise(Main.ticks+100+noiseOffset*freq)*speed, true);
 				while(ticks>secondsPerShot){
-					GameScreen.get().addEntity(new Projectile(getX(), getY()));
+					Map.self.addEntity(new Projectile(getX(), getY()));
 					ticks-=secondsPerShot;
 					bod.applyAngularImpulse(Math.random()>.5?-.5f:.5f, true);
 				}
@@ -73,7 +74,7 @@ public class Archer extends Entity{
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		batch.setColor(Colours.green);
+		batch.setColor(Colours.green[1]);
 		Draw.drawCenteredRotatedScaled(batch, Draw.getSq(), 
 				getX(), getY(), 
 				Main.m2p(size*2), 

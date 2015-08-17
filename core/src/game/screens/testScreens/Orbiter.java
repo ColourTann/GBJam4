@@ -31,8 +31,8 @@ public class Orbiter extends Particle{
 	}
 
 	@Override
-	public void draw(Batch batch) {
-		batch.setColor(Colours.red);
+	public void draw(Batch batch, float parentAlpha) {
+		batch.setColor(Colours.green[0]);
 		Draw.drawCenteredScaled(batch, Draw.getSq(), x, y, 1, 1);
 	}
 

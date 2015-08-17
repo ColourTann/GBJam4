@@ -29,8 +29,8 @@ public class TextWisp extends Particle{
 	}
 
 	@Override
-	public void draw(Batch batch) {
-		Fonts.font.setColor(Colours.light);
+	public void draw(Batch batch, float parentAlpha) {
+		Fonts.font.setColor(Colours.green[0]);
 		Fonts.font.draw(batch, text, x, y, 0, Align.center, false);
 	}
 	

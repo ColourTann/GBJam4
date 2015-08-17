@@ -17,10 +17,13 @@ public abstract class CollisionHandler {
 	}
 	
 	public abstract void handleCollision(Body me, Body them, CollisionHandler other, float collisionStrength, Contact contact);
-	public abstract void damage(int damage);
+	public abstract void damage(int damage, short mask);
 	public void defaultShake(int damage) {
 		GameScreen.get().shake(damage/2);
 	}
 	public abstract String toString();
+
+	public void damage(int damage) {
+	}
 	
 }
