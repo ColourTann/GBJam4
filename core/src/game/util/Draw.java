@@ -107,21 +107,37 @@ public class Draw {
 		drawCenteredRotatedScaled(batch, t, x, y, 1, 1, radianRotation);
 	}
 
-	public static void drawCenteredRotatedScaled(Batch batch, TextureRegion t,
-			float x, float y, float xScale, float yScale, float radianRotation) {
-		drawCenteredRotatedScaledFlipped(batch, t, x, y, xScale, yScale,
-				radianRotation);
-	}
 
-	public static void drawCenteredRotatedScaledFlipped(Batch batch,
+
+	public static void drawCenteredRotatedScaled(Batch batch,
 			TextureRegion t, float x, float y, float scaleX, float scaleY,
 			float radianRotation) {
-		batch.draw(t, x - t.getRegionWidth() / 2f,
-				y - t.getRegionHeight() / 2f, t.getRegionWidth() / 2f,
-				t.getRegionHeight() / 2f, t.getRegionWidth(),
-				t.getRegionHeight(), scaleX, scaleY, rad2deg(radianRotation));
+		drawCenteredRotatedScaled(batch, t, x, y, scaleX, scaleY, radianRotation, false);
 	}
 
+	public static void drawCenteredRotatedScaled(Batch batch,
+			TextureRegion t, float x, float y, float scaleX, float scaleY,
+			float radianRotation, boolean useIntPositions) {
+		if(useIntPositions){
+			batch.draw(t, (int)(x - t.getRegionWidth() / 2f),
+					(int)(y - t.getRegionHeight() / 2f), 
+					(t.getRegionWidth() / 2f),
+					(t.getRegionHeight() / 2f), 
+					t.getRegionWidth(),
+					t.getRegionHeight(), scaleX, scaleY, rad2deg(radianRotation));
+		}
+		else{
+			batch.draw(t, (float)(x - t.getRegionWidth() / 2f),
+					(float)(y - t.getRegionHeight() / 2f), 
+					(t.getRegionWidth() / 2f),
+					(t.getRegionHeight() / 2f), 
+					t.getRegionWidth(),
+					t.getRegionHeight(), scaleX, scaleY, rad2deg(radianRotation));
+		}
+		
+	
+	}
+	
 	//geometric stuff//
 	
 	public static void drawRectangle(Batch batch, float x, float y,

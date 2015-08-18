@@ -32,7 +32,7 @@ public class Ship extends Entity{
 	Body hull;
 	Body spike;
 	public Ship(float x, float y, boolean player){
-		setHP(9915);
+		setHP(3);
 		box.setAsBox(smallSize, smallSize);
 
 		short mask = player?(short)(Mask.border|Mask.enemy|Mask.projectile):(short)(Mask.player|Mask.border|Mask.enemy);
@@ -49,17 +49,21 @@ public class Ship extends Entity{
 
 			@Override
 			public void damage(int damage, short mask) {
+				if(invincibleTicks>0)return;
 				if((mask&Mask.player)>0){
-					if(damage>1){
-						Map.self.destroyBody(hull);
-						hull=null;
-						defaultDamage(damage);
+					if(damage>2){
+						defaultDamage(1);
+						if(hp<=0){
+							Map.self.destroyBody(hull);
+							hull=null;
+						}
 						defaultShake(10);
-						
+						invincible(1f);
 					}
 				}
 			}
 
+			
 			@Override
 			public String toString() {
 				return "ship body";
@@ -92,7 +96,7 @@ public class Ship extends Entity{
 		jointDef.bodyA=hull;
 		jointDef.bodyB=spike;
 		jointDef.initialize(hull, spike, hull.getPosition(), spike.getPosition());
-		Map.world.createJoint(jointDef);
+		Map.self.world.createJoint(jointDef);
 
 
 		if(player){
@@ -131,10 +135,14 @@ public class Ship extends Entity{
 		}
 	}
 
-
+	float invincibleTicks;
+	private void invincible(float seconds) {
+		invincibleTicks=seconds;
+	}
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
+		if(invincibleTicks%.1f>.05f)return;
 		batch.setColor(Colours.green[1]);
 		if(hull!=null){
 			Draw.drawLine(batch, 
@@ -169,6 +177,13 @@ public class Ship extends Entity{
 
 	@Override
 	public void postAct(float delta) {
+		invincibleTicks-=delta;
+	}
+
+
+
+	public int getHP() {
+		return hp;
 	}
 
 }

@@ -45,14 +45,7 @@ public abstract class Entity extends Actor{
 		}
 		
 
-		if(currentWistp!=null&&currentWistp.ratio>0){
-			currentWistp.setText(""+(Integer.parseInt(currentWistp.text)+damage));
-		}
-		else {
-
-			currentWistp=new TextWisp(damage+"", (int)getX(), (int)getY());
-			GameScreen.get().addParticle(currentWistp);
-		}
+		
 		hp-=damage;
 		if(hp<=0) kill();
 	}

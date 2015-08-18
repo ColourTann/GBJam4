@@ -15,6 +15,8 @@ public class Fonts {
 	public static BitmapFont pressStartP2; // size 8 //
 	public static BitmapFont pixelArial; // size 8 //
 	public static BitmapFont visitor; // size 10 //
+	public static BitmapFont betterPixels; // size 16 //
+	public static BitmapFont tinyUnicode; // size 16 //
 	
 	public static BitmapFont font;
 	public static BitmapFont largeFont;
@@ -28,6 +30,8 @@ public class Fonts {
 		pressStartP2 = loadFont("PressStartP2");
 		pixelArial = loadFont("pixelarial");
 		visitor = loadFont("visitor");
+		betterPixels= loadFont("betterpixels");
+		tinyUnicode= loadFont("tinyunicode");
 		
 		font = pixelMix;
 		largeFont=loadFont("pixel-love", 4);

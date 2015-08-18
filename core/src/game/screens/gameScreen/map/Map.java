@@ -1,6 +1,7 @@
 package game.screens.gameScreen.map;
 
 import game.Main;
+import game.screens.gameScreen.GameScreen;
 import game.screens.gameScreen.physics.CollisionHandler;
 import game.screens.gameScreen.physics.entity.Archer;
 import game.screens.gameScreen.physics.entity.DumbBox;
@@ -41,17 +42,32 @@ import com.badlogic.gdx.utils.Array;
 
 
 public class Map extends Group{
-	public static World world = new World(new Vector2(0,-10), false);
+	public World world = new World(new Vector2(0,-10), false);
 	Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
 	Body body;
 	ArrayList<Ship> ships = new ArrayList<Ship>();
 	Entity currentEnemy;
-	Entity currentPlayer;
+	public Ship currentPlayer;
 	public static Map self;
-	CutoffLine line;
-	public Map() {
-		setSize(500, 500);
+	CutoffLine currentLine;
+	CutoffLine targetLine;
+	public Map(int input) {
 		self=this;
+		Pixmap p = Draw.getPixmap(new Texture(Gdx.files.internal("map/"+input+".png")));
+		setSize(p.getWidth()*16, p.getHeight()*16);
+		int numStars = (int) (getWidth()*getHeight()/1000);
+		for(int i=0;i<numStars;i++){
+			Star s = new Star();
+			addActor(s);
+			s.setPosition(Particle.rand(0, getWidth()), Particle.rand(0, getHeight()));
+		}
+		for(int x=0;x<p.getWidth();x++){
+			for(int y=0;y<p.getWidth();y++){
+				if(p.getPixel(x, y)==-1682173953){
+					addEntity(new DumbBox(8+16*x, 16*(p.getHeight()-y)-8));
+				}
+			}
+		}
 		world.setContactListener(new ContactListener() {
 			@Override
 			public void beginContact(Contact contact) {
@@ -82,27 +98,18 @@ public class Map extends Group{
 		});
 
 
-		for(int i=0;i<500;i++){
-			Star s = new Star();
-			addActor(s);
-			s.setPosition(Particle.rand(0, getWidth()), Particle.rand(0, getHeight()));
-		}
-		line = new CutoffLine();
-		line.setPosition(0, 35);
-		addActor(line);
+		currentLine = new CutoffLine(Colours.green[1]);
+		addActor(currentLine);
+		
+		targetLine = new CutoffLine(Colours.green[2]);
+		targetLine.setPosition(0, 55);
+		addActor(targetLine);
 
 		Ship s =new Ship(50, 150, true);
 		addActor(s);
 		currentPlayer=s;
-		Pixmap p = Draw.getPixmap(new Texture(Gdx.files.internal("map/1.png")));
-
-		for(int x=0;x<p.getWidth();x++){
-			for(int y=0;y<p.getWidth();y++){
-				if(p.getPixel(x, y)==-1682173953){
-					addEntity(new DumbBox(8*x, 16*(p.getHeight()-y)-8));
-				}
-			}
-		}
+		
+		
 
 		for(int i=0;i<0;i++)addEnemy();
 
@@ -186,11 +193,7 @@ public class Map extends Group{
 		super.act(delta);
 		toDestroy.clear();
 		ticks+=delta;
-//		while(ticks>=ticksPerEnemy){
-//			addEnemy();
-//			ticks-=ticksPerEnemy;
-//		}
-		if(currentEnemy!=null&&currentEnemy.dead)addEnemy();
+
 		for(int i=entities.size()-1;i>=0;i--){
 			Entity e = entities.get(i);
 			if(e.dead){
@@ -198,12 +201,6 @@ public class Map extends Group{
 				removeActor(e);
 			}
 		}
-		
-		float lerpFactor=.1f;
-		Vector2 playerVector = new Vector2(Main.width/2-currentPlayer.getX(), Main.height/2-currentPlayer.getY());
-		Vector2 targetVector = new Vector2(getX()+(playerVector.x-getX())*lerpFactor, getY()+(playerVector.y-getY())*lerpFactor);
-		targetVector.x=Math.min(0, Math.max(-getWidth()+Main.width, targetVector.x));
-		targetVector.y=Math.min(0, Math.max(-getHeight()+Main.height, targetVector.y));
 		
 		int max = 0;
 		for(Entity e: entities){
@@ -213,22 +210,29 @@ public class Map extends Group{
 				if(top>max)max=top;
 			}
 		}
-		line.setPosition(0, max);
+		currentLine.setPosition(0, max);
 		
-		
-		
-//		Vector2 targetVector = new Vector2(getWidth()/2-currentPlayer.getX(), getHeight()/2-currentPlayer.getY());
-		
-		
+		float lerpFactor=.1f;
+		Vector2 playerVector = new Vector2(Main.width/2-currentPlayer.getX(), Main.height/2-currentPlayer.getY());
+		Vector2 targetVector = new Vector2(getX()+(playerVector.x-getX())*lerpFactor, getY()+(playerVector.y-getY())*lerpFactor);
+		targetVector.x=Math.min(0, Math.max(-getWidth()+Main.width, targetVector.x));
+		targetVector.y=Math.min(0, Math.max(-getHeight()+Main.height, targetVector.y));
 		setPosition((int)targetVector.x, (int)targetVector.y);
+		
+		
+		if(currentLine.getY()<+targetLine.getY()){
+			GameScreen.get().win();
+			
+		}
+			
+		
+		
 	};
 	
+
+
 	public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);
-		batch.setColor(Colours.green[2]);
-
-//		debugRenderer.render(world, Main.self.cam.combined);
-		
 	};
 	
 	ArrayList<Body> toDestroy = new ArrayList<Body>();
@@ -255,7 +259,7 @@ public class Map extends Group{
 		def.position.set(x,y);
 		def.angularDamping=2;
 		Body bod =world.createBody(def);
-		Fixture fixture = bod.createFixture(fixDef);
+		bod.createFixture(fixDef);
 		return bod;
 	}
 
@@ -289,8 +293,12 @@ public class Map extends Group{
 
 
 
-	public static Entity getPlayer() {
+	public static Ship getPlayer() {
 		return self.currentPlayer;
+	}
+
+	public void dispose() {
+		world.dispose();
 	}
 
 }

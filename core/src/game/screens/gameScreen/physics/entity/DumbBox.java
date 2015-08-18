@@ -22,8 +22,6 @@ public class DumbBox extends Entity{
 	public DumbBox(int x, int y) {
 		setSize(16, 16);
 		setHP(2000);
-		int i = +5;
-		System.out.println(+5+(+(+i)));
 		bod = Map.self.makeBody(Main.p2m(x), Main.p2m(y), box, .04f, 1.3f, 100, 1, Mask.enemy, (short)(Mask.player|Mask.border|Mask.enemy));
 		bod.setUserData(new CollisionHandler(bod) {
 			@Override
@@ -52,10 +50,6 @@ public class DumbBox extends Entity{
 
 
 	public int getRotatedTop(){
-/*
- * x2 = x0+(x-x0)*cos(theta)+(y-y0)*sin(theta)
-y2 = y0-(x-x0)*sin(theta)+(y-y0)*cos(theta)
- */
 		float max = 0;
 		for(int x = 0; x<=1;x++){
 			for(int y=0;y<=1;y++){
@@ -77,7 +71,7 @@ y2 = y0-(x-x0)*sin(theta)+(y-y0)*cos(theta)
 		Draw.drawCenteredRotatedScaled(batch, Draw.getSq(), 
 				getX(), getY(), 
 				Main.m2p(size*2)+1, 
-				Main.m2p(size*2)+1, bod.getAngle());
+				Main.m2p(size*2)+1, bod.getAngle(), true);
 	}
 
 }

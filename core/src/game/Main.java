@@ -76,13 +76,18 @@ public class Main extends ApplicationAdapter {
 		stage.addListener(new InputListener(){
 			public boolean keyDown (InputEvent event, int keycode) {
 
+				
+				if(getState()==MainState.Paused){
+					PauseScreen.get().keyDown(keycode);
+				}
+				else currentScreen.keyDown(keycode);
+
 				switch(keycode){
 				case Keys.ESCAPE:
 					toggleMenu();
 					return false;
 				}
-				currentScreen.keyDown(keycode);
-
+				
 				return true;
 			}
 

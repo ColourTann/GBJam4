@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
@@ -20,6 +21,7 @@ public class TextBox extends Actor{
 	public static int gap =4;
 	int wrapWidth;
 	String text;
+	TextureRegion tr;
 	int fontHeight;
 	Runnable r;
 	boolean moused;
@@ -32,7 +34,12 @@ public class TextBox extends Actor{
 		setup(text, boxWidth);
 	}
 	
+	public TextBox(TextureRegion tr){
+		setup(tr);
+	}
+	
 	public void addClickAction(final Runnable r){
+		this.r=r;
 		addListener(new InputListener() {
 			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {	
 				r.run();
@@ -52,6 +59,11 @@ public class TextBox extends Actor{
 		});
 	}
 	
+	boolean wrapped = true;
+	public void setWrapped(boolean wrapped){
+		this.wrapped=wrapped;
+	}
+	
 	private void setup(String text, int boxWidth){
 		this.text=text;
 		this.wrapWidth=boxWidth-gap*2;
@@ -60,11 +72,17 @@ public class TextBox extends Actor{
 		setSize(boxWidth, (int)(gap*2+Fonts.bounds.height));	
 	}
 	
+	private void setup(TextureRegion tr){
+		this.tr=tr;
+		setSize(tr.getRegionWidth()+gap*2, tr.getRegionHeight()+gap*2);
+	}
+	
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 //		fontHeight=Math.random()>.5?(int) Fonts.font.getCapHeight():(int) Fonts.font.getLineHeight();
 		Border.draw(batch, getX(), getY(), getWidth(), getHeight(), moused);
-		font.draw(batch, text, getX()+gap, getY()+fontHeight+gap, wrapWidth, Align.center, true);
+		if(text!=null)font.draw(batch, text, getX()+gap, getY()+fontHeight+gap, wrapWidth, Align.center, wrapped);
+		if(tr!=null)Draw.draw(batch, tr, getX()+gap, getY()+gap);
 		super.draw(batch, parentAlpha);
 	}
 
