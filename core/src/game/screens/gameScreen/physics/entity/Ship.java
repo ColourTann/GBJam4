@@ -9,14 +9,20 @@ import game.screens.testScreens.Orbiter;
 import game.util.Colours;
 import game.util.Draw;
 import game.util.Noise;
+import game.util.Sounds;
+import game.util.TextWisp;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.joints.DistanceJointDef;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
@@ -31,19 +37,21 @@ public class Ship extends Entity{
 
 	Body hull;
 	Body spike;
-	public Ship(float x, float y, boolean player){
-		setHP(3);
+	int playerNum;
+	static Sound hitBlock = Sounds.get("hitblock", Sound.class);
+	public Ship(float x, float y, final int player){
+		this.playerNum=player;
 		box.setAsBox(smallSize, smallSize);
 
-		short mask = player?(short)(Mask.border|Mask.enemy|Mask.projectile):(short)(Mask.player|Mask.border|Mask.enemy);
-		short category = player?Mask.player:Mask.enemy;
+		short mask = (short)(Mask.border|Mask.enemy|Mask.projectile|Mask.player);
+		short category =Mask.player;
 
-		hull=Map.self.makeBody(Main.p2m(x), Main.p2m(y), box, 1.5f, 2, .1f, .6f, category, mask);
+		hull=Map.self.makeBody(Main.p2m(x), Main.p2m(y), box, 1.5f, 2, .1f, .6f, category, mask, BodyType.DynamicBody);
 		bod=hull;
 		hull.setUserData(new CollisionHandler(hull) {
 			@Override
 			public void handleCollision(Body me, Body them, CollisionHandler other, float collisionStrength, Contact contact) {
-				
+
 
 			}
 
@@ -52,18 +60,12 @@ public class Ship extends Entity{
 				if(invincibleTicks>0)return;
 				if((mask&Mask.player)>0){
 					if(damage>2){
-						defaultDamage(1);
-						if(hp<=0){
-							Map.self.destroyBody(hull);
-							hull=null;
-						}
 						defaultShake(10);
-						invincible(1f);
+						invincible(1.5f);
 					}
 				}
 			}
 
-			
 			@Override
 			public String toString() {
 				return "ship body";
@@ -71,11 +73,15 @@ public class Ship extends Entity{
 		});
 
 		box.setAsBox(bigSize*2, bigSize/2);
-		spike=Map.self.makeBody(Main.p2m(x)+dist, Main.p2m(y), box, .2f, 0, .1f, .6f,  category, mask);
+		spike=Map.self.makeBody(Main.p2m(x), Main.p2m(y)+(player<=1?dist:-dist), box, .2f, 0, .1f, .6f,  category, mask, BodyType.DynamicBody);
+		
 		spike.setUserData(new CollisionHandler(spike) {
 			@Override
 			public void handleCollision(Body me, Body them, CollisionHandler other, float collisionStrength, Contact contact) {
-				other.damage((int)(collisionStrength*4), Mask.enemy);
+				if(collisionStrength>1){
+					hitBlock.play(Sounds.volume);
+				}
+				other.damage((int)(collisionStrength*4), (short)(Mask.enemy|Mask.player));
 			}
 
 			@Override
@@ -99,45 +105,68 @@ public class Ship extends Entity{
 		Map.self.world.createJoint(jointDef);
 
 
-		if(player){
-			setController(new Controller() {
-				@Override
-				public void act(float delta) {
-					if(hull==null)return;
-					int dx=0, dy=0;
-					int accel=28;
-					if(Gdx.input.isKeyPressed(Keys.W)||Gdx.input.isKeyPressed(Keys.UP)) dy=1;
-					if(Gdx.input.isKeyPressed(Keys.S)||Gdx.input.isKeyPressed(Keys.DOWN)) dy=-1;
-					if(Gdx.input.isKeyPressed(Keys.A)||Gdx.input.isKeyPressed(Keys.LEFT)) dx=-1;
-					if(Gdx.input.isKeyPressed(Keys.D)||Gdx.input.isKeyPressed(Keys.RIGHT)) dx=1;
-					hull.applyForce(dx*accel, dy*accel, hull.getPosition().x, hull.getPosition().y, true);
+		setController(new Controller() {
+			@Override
+			public void act(float delta) {
+				if(hull==null||invincibleTicks>0)return;
+				int dx=0, dy=0;
+				int accel=28;
+
+				boolean p1 = player<=1;
+				boolean p2 = player%2==0; 
+				boolean up =(Gdx.input.isKeyPressed(Keys.W)&&p1)||(Gdx.input.isKeyPressed(Keys.UP)&&p2); 
+				boolean down=Gdx.input.isKeyPressed(Keys.S)&&p1||Gdx.input.isKeyPressed(Keys.DOWN)&&p2;
+				boolean left =Gdx.input.isKeyPressed(Keys.A)&&p1||Gdx.input.isKeyPressed(Keys.LEFT)&&p2;
+				boolean right =Gdx.input.isKeyPressed(Keys.D)&&p1||Gdx.input.isKeyPressed(Keys.RIGHT)&&p2;
+
+				int i=0;
+				for(com.badlogic.gdx.controllers.Controller c:Controllers.getControllers()){
+					i++;
+					if(!((p1&&i==1)||(p2&&i==2)))continue;
+					
+					
+					float cutoff=.5f;
+					if(c.getAxis(1)>cutoff){
+						right=true;
+					}
+					if(c.getAxis(1)<-cutoff){
+						left=true;
+					}
+					if(c.getAxis(0)>cutoff){
+						down=true;
+					}
+					if(c.getAxis(0)<-cutoff){
+						up=true;
+					}
+
 				}
-			});
-		}
-		else{
-			setController(new Controller() {
-				float noiseOffset = (float) (Math.random()*1000);
-				float noiseAmp=180;
-				float playerAmp=16;
-				float freq=100f;
 
-				@Override
-				public void act(float delta) {
 
-					Entity player = Map.getPlayer();
-					Vector2 dv =player.bod.getPosition().sub(bod.getPosition()).nor();
-					bod.applyForceToCenter(
-							(float) (dv.x*playerAmp+Math.pow(Noise.noise((Main.ticks+noiseOffset)*freq), 2)*noiseAmp), 
-							dv.y*playerAmp+(float) Math.pow(Noise.noise((Main.ticks+100+noiseOffset)*freq),2)*noiseAmp, true);
+				if(up) dy++;
+				if(down) dy--;
+				if(left) dx--;
+				if(right) dx++;
+				
+				if(up||left||right||down){
+					hasMoved=true;
 				}
+				
+				hull.applyForce(dx*accel, dy*accel, hull.getPosition().x, hull.getPosition().y, true);
+			}
+		});
 
-			});
-		}
+
+
 	}
 
 	float invincibleTicks;
+
+	public boolean hasMoved;
+	static Sound hurt = Sounds.get("hurt", Sound.class);
 	private void invincible(float seconds) {
+		hurt.play(Sounds.volume);
 		invincibleTicks=seconds;
+		GameScreen.get().addParticle(new TextWisp("Stunned", (int)(getX()+getParent().getX()), (int)(getY()+getParent().getY())));
 	}
 
 	@Override
@@ -150,7 +179,7 @@ public class Ship extends Entity{
 					(int)Main.m2p(spike.getPosition().x), (int)Main.m2p(spike.getPosition().y), 
 					1);
 
-			batch.setColor(Colours.green[0]);
+			batch.setColor(playerNum<=1?Colours.green[0]:Colours.green[2]);
 			drawBod(batch, hull, smallSize, smallSize);
 		}
 		batch.setColor(Colours.green[2]);

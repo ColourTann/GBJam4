@@ -3,6 +3,7 @@ package game.screens.pause;
 import game.Main;
 import game.Main.TransitionType;
 import game.screens.gameScreen.GameScreen;
+import game.screens.gameScreen.map.Map.MapType;
 import game.screens.testScreens.FontScreen;
 import game.screens.testScreens.StartScreen;
 import game.util.Border;
@@ -48,12 +49,13 @@ public class PauseScreen extends Group{
 		//		Slider.music.setPosition(w/2-Slider.SFX.getWidth()/2, 60);
 		//		addActor(Slider.music);
 
-		menuScreen=new MenuScreen(10,5);
+		menuScreen=new MenuScreen(10,4);
 
 		int levelY=50;
 		int gap =3;
 		for(int y=0;y<2;y++){
-			TextBox tb = new TextBox(y==0?"Demolish":"Targets", 53);
+			final MapType type =y==0?MapType.demolish:MapType.targets;
+			TextBox tb = new TextBox(type.toString(), 53);
 			tb.setPosition(gap+2, gap+y*19+levelY);
 			addActor(tb);
 			for(int x = 0 ;x<4;x++){
@@ -64,8 +66,8 @@ public class PauseScreen extends Group{
 					@Override
 					public void run() {
 						Main.self.setScreen(GameScreen.get(), TransitionType.LEFT, Interpolation.pow2Out, .3f);
-						GameScreen.get().setMap(level);
-						Main.self.toggleMenu();
+						GameScreen.get().setMap(type, level);
+						Main.self.toggleMenu(false);
 					}
 				});	
 				menuScreen.addItem(m);
@@ -90,25 +92,20 @@ public class PauseScreen extends Group{
 		menuScreen.setPosition(0, 0);
 		addActor(menuScreen);
 		
-		int multiplayerY=8;
+		int multiplayerY=24;
 		
-		TextBox linkPic = new TextBox(Main.atlas.findRegion("link"));
-		linkPic.setPosition(gap+24, gap+multiplayerY);
+		MenuItem linkPic = new MenuItem(Main.atlas.findRegion("link"), 3, 3);
+		linkPic.setPosition(getWidth()/2, gap+multiplayerY, Align.center);
+		menuScreen.addItem(linkPic);
+		linkPic.addClickAction(new Runnable() {
+			@Override
+			public void run() {
+				Main.self.setScreen(GameScreen.get(), TransitionType.LEFT, Interpolation.pow2Out, .3f);
+				GameScreen.get().setMap(MapType.ball, 0);
+				Main.self.toggleMenu(false);
+			}
+		});
 		addActor(linkPic);
-		
-		for(int y=0;y<2;y++){
-			MenuItem m = new MenuItem(y==0?"brawl":"ball", 3, y+3, 40);
-			m.addClickAction(new Runnable() {
-				@Override
-				public void run() {
-
-				}
-			});
-			menuScreen.addItem(m);
-			m.setPosition(gap+getWidth()/2, gap+multiplayerY+y*21);
-			addActor(m);
-		}
-
 	}
 
 	private void addScaleButton(final int scale, int x, int y, int width){

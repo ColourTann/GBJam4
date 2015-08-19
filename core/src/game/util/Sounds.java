@@ -12,10 +12,14 @@ public class Sounds {
 
 
 	public static AssetManager am= new AssetManager();
-
+	public static float volume = .2f;
 	public static void setup(){
 		//sfx//
 		makeSound("sfx/win.wav", Sound.class);
+		makeSound("sfx/blip.wav", Sound.class);
+		makeSound("sfx/hitblock.wav", Sound.class);
+		makeSound("sfx/hurt.wav", Sound.class);
+		makeSound("sfx/select.wav", Sound.class);
 		
 		//music//
 		makeSound("sfx/ambience.ogg", Music.class);

@@ -1,5 +1,6 @@
 package game.util;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Group;
 
@@ -57,15 +58,20 @@ public class MenuScreen extends Group{
 
 	}
 
+	
+	public static Sound blip = Sounds.get("blip", Sound.class);
+	static Sound select = Sounds.get("select", Sound.class);
 	private void navigateTo(MenuItem item){
 		if(item==null||item==currentItem)return;
 		currentItem.deselect();
 		currentItem=item;
 		currentItem.select();
+		blip.play(Sounds.volume);
 	}
 
 	public void select() {
 		currentItem.r.run();
+		select.play(Sounds.volume);
 	}
 
 }

@@ -6,6 +6,7 @@ import game.screens.pause.PauseScreen;
 import game.util.Colours;
 import game.util.Draw;
 import game.util.Fonts;
+import game.util.MenuScreen;
 import game.util.Screen;
 import game.util.Sounds;
 
@@ -41,7 +42,7 @@ public class Main extends ApplicationAdapter {
 	public enum MainState{Normal, Paused}
 	private static float scaleFactor=8;
 	public static float ticks=0;
-	private static boolean debug=true;
+	private static boolean debug=false;
 	public static int m2p(float meters){
 		return (int) Math.round(meters*scaleFactor);
 	}
@@ -84,7 +85,7 @@ public class Main extends ApplicationAdapter {
 
 				switch(keycode){
 				case Keys.ESCAPE:
-					toggleMenu();
+					toggleMenu(true);
 					return false;
 				}
 				
@@ -93,6 +94,7 @@ public class Main extends ApplicationAdapter {
 
 
 		});
+		Fonts.font.setColor(Colours.green[0]);
 	}
 
 	public void setScale(int scale){
@@ -104,7 +106,8 @@ public class Main extends ApplicationAdapter {
 		stage.getViewport().update(newWidth, newHeight);
 	}
 
-	public void toggleMenu() {
+	public void toggleMenu(boolean user) {
+		if(user)MenuScreen.blip.play(Sounds.volume);
 		if(state!=MainState.Paused){
 			stage.addActor(InputBlocker.get());
 			stage.addActor(PauseScreen.get());
